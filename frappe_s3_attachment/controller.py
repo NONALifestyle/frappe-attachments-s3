@@ -80,21 +80,14 @@ class S3Operations(object):
                 string.ascii_uppercase + string.digits) for _ in range(8)
         )
 
-        today = datetime.datetime.now()
-        year = today.strftime("%Y")
-        month = today.strftime("%m")
-        day = today.strftime("%d")
-
         doc_path = None
 
         if not doc_path:
             if self.folder_name:
-                final_key = self.folder_name + "/" + year + "/" + month + \
-                    "/" + day + "/" + parent_doctype + "/" + key + "_" + \
+                final_key = self.folder_name + "/" + parent_doctype + "/" + parent_name + "/" + key + "_" + \
                     file_name
             else:
-                final_key = year + "/" + month + "/" + day + "/" + \
-                    parent_doctype + "/" + key + "_" + file_name
+                final_key = parent_doctype + "/" + parent_name + "/" + key + "_" + file_name
             return final_key
         else:
             final_key = doc_path + '/' + key + "_" + file_name
