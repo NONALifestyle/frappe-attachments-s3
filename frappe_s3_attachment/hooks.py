@@ -89,13 +89,6 @@ doctype_list_js = {
 #	}
 # }
 
-doc_events = {
-    "File": {
-        "after_insert": "frappe_s3_attachment.controller.file_upload_to_s3",
-        "on_trash": "frappe_s3_attachment.controller.delete_from_cloud"
-    }
-}
-
 # Scheduled Tasks
 # ---------------
 
@@ -129,3 +122,4 @@ doc_events = {
 # 	"frappe.desk.doctype.event.event.get_events": "frappe_s3_attachment.event.get_events"
 # }
 
+override_doctype_class = {"File": "frappe_s3_attachment.overrides.file.NonaFile"}
