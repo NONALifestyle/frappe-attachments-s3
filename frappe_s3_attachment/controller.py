@@ -191,10 +191,18 @@ class S3Operations(object):
 
 
 @frappe.whitelist()
-def file_upload_to_s3(doc, method):
+def file_upload_to_s3(doc):
     """
     check and upload files to s3. the path check and
     """
+    if doc.file_url.startswith(("http://", "https://", "/api/method/frappe_s3_attachment.controller.generate_file")):
+        content_hash, file_name = frappe.get_value(
+            "File", {"file_url": doc.file_url}, ["content_hash", "file_name"])
+        if file_name:
+            doc.file_name = file_name
+        if content_hash:
+            doc.content_hash = content_hash
+        return
     s3_upload = S3Operations()
     path = doc.file_url
     site_path = frappe.utils.get_site_path()
@@ -223,18 +231,17 @@ def file_upload_to_s3(doc, method):
                 s3_upload.BUCKET,
                 key
             )
-        os.remove(file_path)
-        frappe.db.sql("""UPDATE `tabFile` SET file_url=%s, folder=%s,
-            old_parent=%s, content_hash=%s WHERE name=%s""", (
-            file_url, 'Home/Attachments', 'Home/Attachments', key, doc.name))
-
         doc.file_url = file_url
+        doc.folder = 'Home/Attachments'
+        doc.old_parent = 'Home/Attachments'
+        doc.content_hash = key
 
         if parent_doctype and frappe.get_meta(parent_doctype).get('image_field'):
             frappe.db.set_value(parent_doctype, parent_name, frappe.get_meta(
                 parent_doctype).get('image_field'), file_url)
 
-        frappe.db.commit()
+        os.remove(file_path)
+        return
 
 
 @frappe.whitelist()
@@ -324,10 +331,14 @@ def migrate_existing_files():
     return True
 
 
-def delete_from_cloud(doc, method):
+def delete_from_cloud(doc, method=None):
     """Delete file from s3"""
-    s3 = S3Operations()
-    s3.delete_from_s3(doc.content_hash)
+    if doc.content_hash:
+        count_of_files_with_same_url = frappe.db.count(
+            'File', {"content_hash": doc.content_hash})
+        if count_of_files_with_same_url == 1:
+            s3 = S3Operations()
+            s3.delete_from_s3(doc.content_hash)
 
 
 @frappe.whitelist()
