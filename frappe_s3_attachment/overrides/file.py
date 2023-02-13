@@ -10,7 +10,7 @@ import urllib.parse
 URL_PREFIXES = ("http://", "https://")
 
 
-class NonaFile(File):
+class S3File(File):
     def before_insert(self):
         self.set_folder_name()
         self.set_file_name()
@@ -28,7 +28,7 @@ class NonaFile(File):
             self.flags.new_file = True
             frappe.local.rollback_observers.append(self)
 
-        file_upload_to_s3(self, "method")
+        file_upload_to_s3(self)
 
     def validate_file_path(self):
         if self.is_remote_file:

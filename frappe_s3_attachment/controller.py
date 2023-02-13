@@ -191,7 +191,7 @@ class S3Operations(object):
 
 
 @frappe.whitelist()
-def file_upload_to_s3(doc, method):
+def file_upload_to_s3(doc):
     """
     check and upload files to s3. the path check and
     """
