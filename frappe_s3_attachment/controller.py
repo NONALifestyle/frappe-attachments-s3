@@ -229,10 +229,10 @@ def file_upload_to_s3(doc, method):
             file_url, 'Home/Attachments', 'Home/Attachments', key, doc.name))
 
         doc.file_url = file_url
-
-        if parent_doctype and frappe.get_meta(parent_doctype).get('image_field'):
-            frappe.db.set_value(parent_doctype, parent_name, frappe.get_meta(
-                parent_doctype).get('image_field'), file_url)
+        
+        if parent_doctype and doc.attached_to_field:
+            frappe.db.set_value(parent_doctype, parent_name,
+                                doc.attached_to_field, file_url, update_modified=False)
 
         frappe.db.commit()
 
